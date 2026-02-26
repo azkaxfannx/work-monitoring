@@ -1,9 +1,6 @@
-import type { Server } from "socket.io";
-
+/* eslint-disable no-var */
 declare global {
-  // eslint-disable-next-line no-var
-  var io: Server | undefined;
-  // eslint-disable-next-line no-var
+  var io: { emit: (event: string, data: unknown) => void } | undefined;
   var emitEvent: ((event: string, data: unknown) => void) | undefined;
 }
 

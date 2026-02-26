@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import "@/types/global.d.ts";
 
 // PUT /api/divisions/[id] — Update division name
 export async function PUT(

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import "@/types/global.d.ts";
 
 // GET /api/divisions — Fetch all divisions with columns and rows
 export async function GET() {

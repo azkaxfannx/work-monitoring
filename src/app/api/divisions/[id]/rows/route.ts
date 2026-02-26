@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import "@/types/global.d.ts";
 
 // POST /api/divisions/[id]/rows — Create a new row with empty cells
 export async function POST(

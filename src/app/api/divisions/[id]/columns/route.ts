@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import "@/types/global.d.ts";
 
 // POST /api/divisions/[id]/columns — Create a column
 export async function POST(
