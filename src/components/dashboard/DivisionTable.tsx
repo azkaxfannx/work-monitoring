@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Trash2 } from "lucide-react";
 import CellEditor from "./CellEditor";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import type { Column, RowWithCells } from "@/types";
 
 interface DivisionTableProps {
@@ -18,6 +19,8 @@ export default function DivisionTable({
   onUpdateCell,
   onDeleteRow,
 }: DivisionTableProps) {
+  const confirm = useConfirm();
+
   if (columns.length === 0) {
     return (
       <div className="py-8 text-center text-sm text-gray-400">
@@ -86,10 +89,15 @@ export default function DivisionTable({
                 ))}
                 <td className="px-2 py-1">
                   <button
-                    onClick={() => {
-                      if (window.confirm("Hapus baris ini?")) {
-                        onDeleteRow(row.id);
-                      }
+                    onClick={async () => {
+                      const ok = await confirm({
+                        title: "Hapus Baris?",
+                        message:
+                          "Baris ini beserta semua datanya akan dihapus permanen.",
+                        confirmLabel: "Ya, Hapus",
+                        variant: "danger",
+                      });
+                      if (ok) onDeleteRow(row.id);
                     }}
                     className="rounded p-1 text-gray-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
                     title="Hapus baris"

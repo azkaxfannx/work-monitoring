@@ -4,6 +4,8 @@ import { useState } from "react";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { Plus, Pencil, Trash2, Check, X } from "lucide-react";
+import { useToast } from "@/components/ui/Toast";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import type { Division } from "@/types";
 
 interface DivisionManagerProps {
@@ -19,6 +21,8 @@ export default function DivisionManager({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
+  const confirm = useConfirm();
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +37,12 @@ export default function DivisionManager({
       if (res.ok) {
         setNewName("");
         onRefetch();
+        toast.success("Divisi berhasil ditambahkan");
+      } else {
+        toast.error("Gagal menambahkan divisi");
       }
+    } catch {
+      toast.error("Gagal terhubung ke server");
     } finally {
       setLoading(false);
     }
@@ -51,19 +60,32 @@ export default function DivisionManager({
       if (res.ok) {
         setEditingId(null);
         onRefetch();
+        toast.success("Divisi berhasil diperbarui");
+      } else {
+        toast.error("Gagal memperbarui divisi");
       }
+    } catch {
+      toast.error("Gagal terhubung ke server");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!window.confirm(`Hapus divisi "${name}" beserta semua datanya?`))
-      return;
+    const ok = await confirm({
+      title: "Hapus Divisi?",
+      message: `Divisi "${name}" beserta semua kolom dan datanya akan dihapus permanen.`,
+      confirmLabel: "Ya, Hapus",
+      variant: "danger",
+    });
+    if (!ok) return;
     setLoading(true);
     try {
       await fetch(`/api/divisions/${id}`, { method: "DELETE" });
       onRefetch();
+      toast.success(`Divisi "${name}" berhasil dihapus`);
+    } catch {
+      toast.error("Gagal menghapus divisi");
     } finally {
       setLoading(false);
     }

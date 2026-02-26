@@ -10,6 +10,8 @@ import {
   ChevronDown,
   GripVertical,
 } from "lucide-react";
+import { useToast } from "@/components/ui/Toast";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import type { Division, ColumnType } from "@/types";
 
 interface ColumnManagerProps {
@@ -35,6 +37,8 @@ export default function ColumnManager({
   const [newColType, setNewColType] = useState<ColumnType>("TEXT");
   const [newColOptions, setNewColOptions] = useState("");
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
+  const confirm = useConfirm();
 
   const selectedDivision = divisions.find((d) => d.id === selectedDivisionId);
   const columns = selectedDivision?.columns || [];
@@ -66,19 +70,25 @@ export default function ColumnManager({
         setNewColType("TEXT");
         setNewColOptions("");
         onRefetch();
+        toast.success("Kolom berhasil ditambahkan");
+      } else {
+        toast.error("Gagal menambahkan kolom");
       }
+    } catch {
+      toast.error("Gagal terhubung ke server");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (columnId: string, columnName: string) => {
-    if (
-      !window.confirm(
-        `Hapus kolom "${columnName}"? Semua data di kolom ini akan hilang.`,
-      )
-    )
-      return;
+    const ok = await confirm({
+      title: "Hapus Kolom?",
+      message: `Kolom "${columnName}" beserta semua data di dalamnya akan dihapus permanen.`,
+      confirmLabel: "Ya, Hapus",
+      variant: "danger",
+    });
+    if (!ok) return;
     setLoading(true);
     try {
       await fetch(`/api/divisions/${selectedDivisionId}/columns`, {
@@ -87,6 +97,9 @@ export default function ColumnManager({
         body: JSON.stringify({ columnId }),
       });
       onRefetch();
+      toast.success(`Kolom "${columnName}" berhasil dihapus`);
+    } catch {
+      toast.error("Gagal menghapus kolom");
     } finally {
       setLoading(false);
     }

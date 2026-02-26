@@ -4,27 +4,25 @@ import { useState } from "react";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { KeyRound } from "lucide-react";
+import { useToast } from "@/components/ui/Toast";
 
 export default function PasswordChanger() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
 
     if (newPassword !== confirmPassword) {
-      setError("Password baru tidak cocok");
+      toast.warning("Password baru tidak cocok");
       return;
     }
 
     if (newPassword.length < 4) {
-      setError("Password minimal 4 karakter");
+      toast.warning("Password minimal 4 karakter");
       return;
     }
 
@@ -38,16 +36,16 @@ export default function PasswordChanger() {
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || "Gagal mengubah password");
+        toast.error(data.error || "Gagal mengubah password");
         return;
       }
 
-      setSuccess("Password berhasil diubah!");
+      toast.success("Password berhasil diubah!");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch {
-      setError("Gagal terhubung ke server");
+      toast.error("Gagal terhubung ke server");
     } finally {
       setLoading(false);
     }
@@ -83,8 +81,6 @@ export default function PasswordChanger() {
           onChange={(e) => setConfirmPassword(e.target.value)}
           placeholder="••••••"
         />
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        {success && <p className="text-sm text-green-600">{success}</p>}
         <Button type="submit" disabled={loading}>
           <KeyRound size={16} />
           {loading ? "Menyimpan..." : "Ubah Password"}
