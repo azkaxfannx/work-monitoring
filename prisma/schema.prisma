@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ColumnType {
+  TEXT
+  NUMBER
+  DATE
+  DROPDOWN
+}
+
+model Division {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  columns   Column[]
+  rows      Row[]
+}
+
+model Column {
+  id         String     @id @default(uuid())
+  divisionId String
+  division   Division   @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+  name       String
+  type       ColumnType @default(TEXT)
+  options    String?
+  order      Int        @default(0)
+  createdAt  DateTime   @default(now())
+  cells      CellValue[]
+
+  @@index([divisionId])
+}
+
+model Row {
+  id         String      @id @default(uuid())
+  divisionId String
+  division   Division    @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  cells      CellValue[]
+
+  @@index([divisionId])
+}
+
+model CellValue {
+  id        String   @id @default(uuid())
+  rowId     String
+  row       Row      @relation(fields: [rowId], references: [id], onDelete: Cascade)
+  columnId  String
+  column    Column   @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  value     String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([rowId, columnId])
+  @@index([rowId])
+  @@index([columnId])
+}
+
+model AppSetting {
+  id    String @id @default(uuid())
+  key   String @unique
+  value String
+}
