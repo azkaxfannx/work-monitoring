@@ -106,7 +106,8 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
 
   const variant = state?.options.variant ?? "danger";
   const config = variantConfig[variant];

@@ -69,7 +69,7 @@ export default function SettingsModal({
           </div>
 
           {/* Tab content */}
-          <div className="max-h-[60vh] overflow-y-auto">
+          <div className="max-h-[60vh] overflow-y-auto overscroll-contain rounded-lg">
             {activeTab === "divisions" && (
               <DivisionManager divisions={divisions} onRefetch={onRefetch} />
             )}

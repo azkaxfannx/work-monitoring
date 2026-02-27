@@ -9,9 +9,11 @@ import {
   ChevronUp,
   ChevronDown,
   GripVertical,
+  Columns3,
 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
+import { parseDropdownOptions } from "@/utils/helpers";
 import type { Division, ColumnType } from "@/types";
 
 interface ColumnManagerProps {
@@ -119,23 +121,28 @@ export default function ColumnManager({
 
     setLoading(true);
     try {
-      // Swap orders
-      await fetch(`/api/divisions/${selectedDivisionId}/columns`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          columnId: columns[idx].id,
-          order: swapOrder,
+      // Swap orders atomically
+      await Promise.all([
+        fetch(`/api/divisions/${selectedDivisionId}/columns`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            columnId: columns[idx].id,
+            order: swapOrder,
+          }),
         }),
-      });
-      await fetch(`/api/divisions/${selectedDivisionId}/columns`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          columnId: columns[swapIdx].id,
-          order: currentOrder,
+        fetch(`/api/divisions/${selectedDivisionId}/columns`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            columnId: columns[swapIdx].id,
+            order: currentOrder,
+          }),
         }),
-      });
+      ]);
+      onRefetch();
+    } catch {
+      toast.error("Gagal mengubah urutan kolom");
       onRefetch();
     } finally {
       setLoading(false);
@@ -214,14 +221,18 @@ export default function ColumnManager({
           {/* Column list */}
           <div className="space-y-2">
             {columns.length === 0 && (
-              <p className="py-4 text-center text-sm text-gray-400">
-                Belum ada kolom untuk divisi ini
-              </p>
+              <div className="flex flex-col items-center gap-1 py-6 text-gray-400">
+                <Columns3 size={28} className="text-gray-300" />
+                <p className="text-sm">Belum ada kolom</p>
+                <p className="text-xs text-gray-300">
+                  Tambah kolom pertama di atas
+                </p>
+              </div>
             )}
             {columns.map((col, idx) => (
               <div
                 key={col.id}
-                className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2"
+                className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2.5 transition-colors hover:bg-gray-50"
               >
                 <GripVertical size={14} className="text-gray-300" />
                 <div className="flex-1">
@@ -233,7 +244,7 @@ export default function ColumnManager({
                   </span>
                   {col.type === "DROPDOWN" && col.options && (
                     <span className="ml-1 text-xs text-gray-400">
-                      ({JSON.parse(col.options).join(", ")})
+                      ({parseDropdownOptions(col.options).join(", ")})
                     </span>
                   )}
                 </div>

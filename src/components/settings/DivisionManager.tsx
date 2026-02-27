@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
-import { Plus, Pencil, Trash2, Check, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, X, FolderOpen } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import type { Division } from "@/types";
@@ -113,14 +113,16 @@ export default function DivisionManager({
       {/* Division list */}
       <div className="space-y-2">
         {divisions.length === 0 && (
-          <p className="py-4 text-center text-sm text-gray-400">
-            Belum ada divisi
-          </p>
+          <div className="flex flex-col items-center gap-1 py-6 text-gray-400">
+            <FolderOpen size={28} className="text-gray-300" />
+            <p className="text-sm">Belum ada divisi</p>
+            <p className="text-xs text-gray-300">Buat divisi pertama di atas</p>
+          </div>
         )}
         {divisions.map((div) => (
           <div
             key={div.id}
-            className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2"
+            className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 transition-colors hover:bg-gray-100/70"
           >
             {editingId === div.id ? (
               <>

@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
 
     if (!password) {
       return NextResponse.json(
-        { error: "Password is required" },
+        { error: "Password wajib diisi" },
         { status: 400 },
       );
     }
@@ -20,7 +20,10 @@ export async function POST(req: NextRequest) {
 
     if (!setting) {
       return NextResponse.json(
-        { error: "Admin password not configured. Run seed first." },
+        {
+          error:
+            "Password admin belum dikonfigurasi. Jalankan seed terlebih dahulu.",
+        },
         { status: 500 },
       );
     }
@@ -35,7 +38,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("POST /api/auth/verify error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Terjadi kesalahan server" },
       { status: 500 },
     );
   }

@@ -20,7 +20,7 @@ export async function POST(
       data: {
         divisionId,
         cells: {
-          create: columns.map((col) => ({
+          create: columns.map((col: { id: string }) => ({
             columnId: col.id,
             value: "",
           })),
@@ -38,10 +38,7 @@ export async function POST(
     return NextResponse.json(row, { status: 201 });
   } catch (error) {
     console.error("POST /api/divisions/[id]/rows error:", error);
-    return NextResponse.json(
-      { error: "Failed to create row" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Gagal membuat baris" }, { status: 500 });
   }
 }
 
@@ -56,28 +53,41 @@ export async function PUT(
 
     if (!rowId || !cells || !Array.isArray(cells)) {
       return NextResponse.json(
-        { error: "rowId and cells array are required" },
+        { error: "rowId dan cells wajib diisi" },
         { status: 400 },
       );
     }
 
-    // Upsert each cell value
-    for (const cell of cells) {
-      await prisma.cellValue.upsert({
-        where: {
-          rowId_columnId: {
+    // Validate row belongs to this division
+    const existingRow = await prisma.row.findFirst({
+      where: { id: rowId, divisionId },
+    });
+    if (!existingRow) {
+      return NextResponse.json(
+        { error: "Baris tidak ditemukan di divisi ini" },
+        { status: 404 },
+      );
+    }
+
+    // Upsert each cell value in a single transaction
+    await prisma.$transaction(
+      (cells as { columnId: string; value: string }[]).map((cell) =>
+        prisma.cellValue.upsert({
+          where: {
+            rowId_columnId: {
+              rowId,
+              columnId: cell.columnId,
+            },
+          },
+          update: { value: cell.value },
+          create: {
             rowId,
             columnId: cell.columnId,
+            value: cell.value,
           },
-        },
-        update: { value: cell.value },
-        create: {
-          rowId,
-          columnId: cell.columnId,
-          value: cell.value,
-        },
-      });
-    }
+        }),
+      ),
+    );
 
     // Fetch updated row
     const row = await prisma.row.findUnique({
@@ -93,7 +103,7 @@ export async function PUT(
   } catch (error) {
     console.error("PUT /api/divisions/[id]/rows error:", error);
     return NextResponse.json(
-      { error: "Failed to update row" },
+      { error: "Gagal mengupdate baris" },
       { status: 500 },
     );
   }
@@ -109,7 +119,18 @@ export async function DELETE(
     const { rowId } = await req.json();
 
     if (!rowId) {
-      return NextResponse.json({ error: "rowId is required" }, { status: 400 });
+      return NextResponse.json({ error: "rowId wajib diisi" }, { status: 400 });
+    }
+
+    // Validate row belongs to this division
+    const existingRow = await prisma.row.findFirst({
+      where: { id: rowId, divisionId },
+    });
+    if (!existingRow) {
+      return NextResponse.json(
+        { error: "Row not found in this division" },
+        { status: 404 },
+      );
     }
 
     await prisma.row.delete({ where: { id: rowId } });
@@ -122,7 +143,7 @@ export async function DELETE(
   } catch (error) {
     console.error("DELETE /api/divisions/[id]/rows error:", error);
     return NextResponse.json(
-      { error: "Failed to delete row" },
+      { error: "Gagal menghapus baris" },
       { status: 500 },
     );
   }

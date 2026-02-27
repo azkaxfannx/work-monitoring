@@ -22,10 +22,7 @@ export async function GET() {
     return NextResponse.json(divisions);
   } catch (error) {
     console.error("GET /api/divisions error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch divisions" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Gagal memuat divisi" }, { status: 500 });
   }
 }
 
@@ -36,7 +33,7 @@ export async function POST(req: NextRequest) {
 
     if (!name?.trim()) {
       return NextResponse.json(
-        { error: "Division name is required" },
+        { error: "Nama divisi wajib diisi" },
         { status: 400 },
       );
     }
@@ -60,7 +57,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("POST /api/divisions error:", error);
     return NextResponse.json(
-      { error: "Failed to create division" },
+      { error: "Gagal membuat divisi" },
       { status: 500 },
     );
   }

@@ -9,7 +9,7 @@ export async function PUT(req: NextRequest) {
 
     if (!currentPassword || !newPassword) {
       return NextResponse.json(
-        { error: "Current and new password are required" },
+        { error: "Password lama dan baru wajib diisi" },
         { status: 400 },
       );
     }
@@ -27,7 +27,7 @@ export async function PUT(req: NextRequest) {
 
     if (!setting) {
       return NextResponse.json(
-        { error: "Admin password not configured" },
+        { error: "Password admin belum dikonfigurasi" },
         { status: 500 },
       );
     }
@@ -40,7 +40,7 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const hashedNew = await bcrypt.hash(newPassword, 10);
+    const hashedNew = await bcrypt.hash(newPassword, 12);
     await prisma.appSetting.update({
       where: { key: "admin_password" },
       data: { value: hashedNew },
@@ -50,7 +50,7 @@ export async function PUT(req: NextRequest) {
   } catch (error) {
     console.error("PUT /api/settings/password error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Terjadi kesalahan server" },
       { status: 500 },
     );
   }

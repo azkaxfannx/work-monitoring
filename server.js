@@ -14,10 +14,14 @@ app.prepare().then(() => {
     handle(req, res);
   });
 
+  const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(",")
+    : [`http://localhost:${port}`];
+
   const io = new Server(server, {
     path: "/api/socket",
     cors: {
-      origin: "*",
+      origin: allowedOrigins,
       methods: ["GET", "POST"],
     },
     addTrailingSlash: false,
@@ -26,16 +30,21 @@ app.prepare().then(() => {
   // Make io globally accessible for API routes
   global.io = io;
 
-  global.emitEvent = (event, data) => {
-    io.emit(event, data);
-  };
-
   io.on("connection", (socket) => {
     console.log(`[Socket.IO] Client connected: ${socket.id}`);
 
     socket.on("disconnect", (reason) => {
       console.log(`[Socket.IO] Client disconnected: ${socket.id} - ${reason}`);
     });
+  });
+
+  server.on("error", (err) => {
+    if (err.code === "EADDRINUSE") {
+      console.error(`Port ${port} is already in use`);
+    } else {
+      console.error("Server error:", err);
+    }
+    process.exit(1);
   });
 
   server.listen(port, () => {

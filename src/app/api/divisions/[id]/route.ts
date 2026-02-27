@@ -12,7 +12,7 @@ export async function PUT(
 
     if (!name?.trim()) {
       return NextResponse.json(
-        { error: "Division name is required" },
+        { error: "Nama divisi wajib diisi" },
         { status: 400 },
       );
     }
@@ -37,7 +37,7 @@ export async function PUT(
   } catch (error) {
     console.error("PUT /api/divisions/[id] error:", error);
     return NextResponse.json(
-      { error: "Failed to update division" },
+      { error: "Gagal mengupdate divisi" },
       { status: 500 },
     );
   }
@@ -61,7 +61,7 @@ export async function DELETE(
   } catch (error) {
     console.error("DELETE /api/divisions/[id] error:", error);
     return NextResponse.json(
-      { error: "Failed to delete division" },
+      { error: "Gagal menghapus divisi" },
       { status: 500 },
     );
   }

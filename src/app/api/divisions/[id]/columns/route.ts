@@ -12,7 +12,16 @@ export async function POST(
 
     if (!name?.trim()) {
       return NextResponse.json(
-        { error: "Column name is required" },
+        { error: "Nama kolom wajib diisi" },
+        { status: 400 },
+      );
+    }
+
+    // Validate column type
+    const validTypes = ["TEXT", "NUMBER", "DATE", "DROPDOWN"];
+    if (type && !validTypes.includes(type)) {
+      return NextResponse.json(
+        { error: "Tipe kolom tidak valid" },
         { status: 400 },
       );
     }
@@ -43,7 +52,7 @@ export async function POST(
 
     if (existingRows.length > 0) {
       await prisma.cellValue.createMany({
-        data: existingRows.map((row) => ({
+        data: existingRows.map((row: { id: string }) => ({
           rowId: row.id,
           columnId: column.id,
           value: "",
@@ -70,10 +79,7 @@ export async function POST(
     return NextResponse.json(column, { status: 201 });
   } catch (error) {
     console.error("POST /api/divisions/[id]/columns error:", error);
-    return NextResponse.json(
-      { error: "Failed to create column" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Gagal membuat kolom" }, { status: 500 });
   }
 }
 
@@ -90,6 +96,17 @@ export async function PUT(
       return NextResponse.json(
         { error: "Column ID is required" },
         { status: 400 },
+      );
+    }
+
+    // Validate column belongs to this division
+    const existingCol = await prisma.column.findFirst({
+      where: { id: columnId, divisionId },
+    });
+    if (!existingCol) {
+      return NextResponse.json(
+        { error: "Column not found in this division" },
+        { status: 404 },
       );
     }
 
@@ -123,7 +140,7 @@ export async function PUT(
   } catch (error) {
     console.error("PUT /api/divisions/[id]/columns error:", error);
     return NextResponse.json(
-      { error: "Failed to update column" },
+      { error: "Gagal mengupdate kolom" },
       { status: 500 },
     );
   }
@@ -140,8 +157,19 @@ export async function DELETE(
 
     if (!columnId) {
       return NextResponse.json(
-        { error: "Column ID is required" },
+        { error: "ID kolom wajib diisi" },
         { status: 400 },
+      );
+    }
+
+    // Validate column belongs to this division
+    const existingCol = await prisma.column.findFirst({
+      where: { id: columnId, divisionId },
+    });
+    if (!existingCol) {
+      return NextResponse.json(
+        { error: "Kolom tidak ditemukan di divisi ini" },
+        { status: 404 },
       );
     }
 
@@ -166,7 +194,7 @@ export async function DELETE(
   } catch (error) {
     console.error("DELETE /api/divisions/[id]/columns error:", error);
     return NextResponse.json(
-      { error: "Failed to delete column" },
+      { error: "Gagal menghapus kolom" },
       { status: 500 },
     );
   }

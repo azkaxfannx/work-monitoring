@@ -43,9 +43,9 @@ export default function PasswordGate({ onSuccess }: PasswordGateProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col items-center gap-4 py-4"
+      className="flex flex-col items-center gap-4 py-6"
     >
-      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-50">
+      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-100 shadow-sm">
         <Lock size={28} className="text-blue-600" />
       </div>
       <div className="text-center">
@@ -67,6 +67,7 @@ export default function PasswordGate({ onSuccess }: PasswordGateProps) {
       <Button type="submit" disabled={loading || !password}>
         {loading ? "Memverifikasi..." : "Masuk"}
       </Button>
+      <p className="text-xs text-gray-400">Tekan Enter untuk masuk</p>
     </form>
   );
 }
